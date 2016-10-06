@@ -24,9 +24,7 @@ public extension UIFont{
         let fontName = UIFont.getFontName(font)
         var token: dispatch_once_t = 0
         if (UIFont.fontNamesForFamilyName(fontName).count == 0) {
-            dispatch_once(&token) {
-                FontLoader.loadFont(fontName)
-            }
+            FontLoader.loadFont(fontName)
         }
         return UIFont(name: UIFont.getFontName(font), size: fontSize)!
     }
@@ -62,19 +60,24 @@ public extension UIFont{
 
 public extension UIImage
 {
-    public static func iconToImage(font: Fonts, iconCode: String, imageSize: CGSize,fontSize: CGFloat) -> UIImage
+    public static func iconToImage(font: Fonts, iconCode: String, imageSize: CGSize,fontSize: CGFloat) -> UIImage?
     {
-        let drawText = String.getIcon(font, code: iconCode)
+        guard let drawText = String.getIcon(font, code: iconCode) else {
+            assertionFailure("not found icon code \(iconCode)")
+            return nil
+        }
         
         UIGraphicsBeginImageContextWithOptions(imageSize, false, 0)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = NSTextAlignment.Center
         
-        drawText!.drawInRect(CGRectMake(0, 0, imageSize.width, imageSize.height), withAttributes: [NSFontAttributeName : UIFont.iconFontOfSize(font, fontSize: fontSize)])
+        drawText.drawInRect(CGRectMake(0, 0, imageSize.width, imageSize.height), withAttributes: [NSFontAttributeName : UIFont.iconFontOfSize(font, fontSize: fontSize)])
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
+        
+        assert(image != nil, "cannot create image")
 
-        return image!
+        return image
     }
 }
 
